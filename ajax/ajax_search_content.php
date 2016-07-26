@@ -8,6 +8,8 @@ Class SearchContent{
     public $content       = null;
     public $protocol      = null;
     public $links         = null;
+    public $listLinksInt  = "";
+    public $listLinksExt  = "";
 
     public function getDomainName(){
 
@@ -31,7 +33,7 @@ Class SearchContent{
         return self::getAllLinks($this->content);
 
     }
-    public static function getCountLinksInt($links, $domain){
+    public function getCountLinksInt($links, $domain){
 
         $countLinks = 0;
 
@@ -41,12 +43,22 @@ Class SearchContent{
             // Ищем в ссылке домен, а возвращаемый результат плюсуем к уже имеющемуся
             $countLinks = ($countLinks + self::sumLinksInContent($links[$i], $domain, 1, 0));
 
+            // Записываем список внутренних ссылок
+            $link = self::listLinksInContent($links[$i], $domain, $links[$i], "");
+
+            if($link){
+
+                $link = "<a href='".$link."'>".substr($link, 0, 25)."...</a><br/>";
+                $this->listLinksInt .= $link;
+
+            }
+
         }
 
         return $countLinks;
 
     }
-    public static function getCountLinksExt($links, $domain){
+    public function getCountLinksExt($links, $domain){
 
         $countLinks = 0;
 
@@ -56,9 +68,26 @@ Class SearchContent{
             // Ищем в ссылке домен, а возвращаемый результат плюсуем к уже имеющемуся
             $countLinks = ($countLinks + self::sumLinksInContent($links[$i], $domain, 0, 1));
 
+            // Записываем список внешних ссылок
+            $link = self::listLinksInContent($links[$i], $domain, "", $links[$i]);
+
+            if($link != ""){
+
+                $link = "<a href='".$link."'>".substr($link, 0, 25)."...</a><br/>";
+                $this->listLinksExt .= $link;
+
+            }
+
         }
 
         return $countLinks;
+
+    }
+    public static function listLinksInContent($link, $domain, $ifTrue, $ifFalse){
+
+        // Если в ссылке есть домен, то возвращаем 1, если нет то 0
+        // (в зависимости какие ссылки ищем внутренние или внешние)
+        return (strpos($link, $domain)) ? $ifTrue : self::listLinksRelative($link, $ifTrue, $ifFalse);
 
     }
     public static function sumLinksInContent($link, $domain, $ifTrue, $ifFalse){
@@ -66,6 +95,13 @@ Class SearchContent{
         // Если в ссылке есть домен, то возвращаем 1, если нет то 0
         // (в зависимости какие ссылки ищем внутренние или внешние)
         return (strpos($link, $domain)) ? $ifTrue : self::sumLinksRelative($link, $ifTrue, $ifFalse);
+
+    }
+    public static function listLinksRelative($link, $ifTrue, $ifFalse){
+
+        // Проверяем на возможность относительной ссылки, есди находим то возвращаем 1, если нет то 0
+        //(в зависимости какие ссылки ище внутренние или внешние) ifTrue возвращается если ссылка относительны
+        return (strpos($link, "ttp://") || strpos($link, "ttps://")) ? $ifFalse : $ifTrue;
 
     }
     public static function sumLinksRelative($link, $ifTrue, $ifFalse){

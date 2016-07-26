@@ -20,12 +20,12 @@ Class AjaxResponse extends SearchContent{
             $this->getDomainName()
         );
 
-        $this->countsLinkInt = self::getCountLinksInt(
+        $this->countsLinkInt = $this->getCountLinksInt(
             $this->getContent(),
             $this->siteName
         );
 
-        $this->countsLinkExt = self::getCountLinksExt(
+        $this->countsLinkExt = $this->getCountLinksExt(
             $this->getContent(),
             $this->siteName
         );
